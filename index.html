@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💕 Pop the Bubbles!</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #ffd6e7 0%, #ffecf5 40%, #d6eaff 100%);
+    min-height: 100vh;
+    overflow: hidden;
+    cursor: crosshair;
+    user-select: none;
+  }
+
+  /* Soft background stars/sparkles */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle 2px at 10% 20%, #ffb3d1 100%, transparent 100%),
+      radial-gradient(circle 2px at 80% 10%, #b3c8ff 100%, transparent 100%),
+      radial-gradient(circle 2px at 50% 80%, #ffb3d1 100%, transparent 100%),
+      radial-gradient(circle 3px at 90% 70%, #b3c8ff 100%, transparent 100%),
+      radial-gradient(circle 2px at 20% 90%, #ffd6b3 100%, transparent 100%);
+    pointer-events: none;
+  }
+
+  /* Header */
+  #hud {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 28px;
+    background: rgba(255,255,255,0.55);
+    backdrop-filter: blur(12px);
+    border-bottom: 2px solid rgba(255,180,210,0.4);
+    z-index: 100;
+  }
+
+  #title {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #e06fa0;
+    letter-spacing: -0.5px;
+  }
+
+  #score-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #ff8ec2, #ff6aaa);
+    color: white;
+    font-weight: 900;
+    font-size: 1.2rem;
+    padding: 8px 20px;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(255,100,170,0.4);
+    transition: transform 0.1s;
+  }
+
+  #score-box.bump {
+    transform: scale(1.18);
+  }
+
+  #progress-bar-wrap {
+    width: 200px;
+    height: 12px;
+    background: rgba(255,180,210,0.3);
+    border-radius: 50px;
+    overflow: hidden;
+    border: 1.5px solid rgba(255,180,210,0.5);
+  }
+
+  #progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #ff8ec2, #ff5ba0);
+    border-radius: 50px;
+    transition: width 0.3s ease;
+  }
+
+  /* Game area */
+  #game {
+    position: fixed;
+    inset: 0;
+    top: 70px;
+  }
+
+  /* Bubbles */
+  .bubble {
+    position: absolute;
+    border-radius: 50%;
+    cursor: pointer;
+    animation: floatUp linear forwards;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    box-shadow: inset -6px -6px 12px rgba(255,255,255,0.5),
+                inset 3px 3px 8px rgba(255,255,255,0.8),
+                0 4px 20px rgba(0,0,0,0.08);
+    transition: transform 0.1s;
+  }
+
+  .bubble:hover {
+    transform: scale(1.1);
+  }
+
+  @keyframes floatUp {
+    0%   { transform: translateY(0) scale(1); opacity: 0.9; }
+    100% { transform: translateY(-110vh) scale(0.8); opacity: 0; }
+  }
+
+  /* Pop effect */
+  .pop-burst {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: popBurst 0.4s ease-out forwards;
+  }
+
+  @keyframes popBurst {
+    0%   { transform: scale(0.5); opacity: 1; }
+    100% { transform: scale(3); opacity: 0; }
+  }
+
+  .pop-text {
+    position: absolute;
+    font-weight: 900;
+    font-size: 1.4rem;
+    color: #e06fa0;
+    pointer-events: none;
+    animation: floatScore 0.9s ease-out forwards;
+    text-shadow: 0 2px 8px rgba(224,111,160,0.4);
+    z-index: 200;
+  }
+
+  @keyframes floatScore {
+    0%   { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-70px) scale(1.3); opacity: 0; }
+  }
+
+  /* Win overlay */
+  #win-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(255,220,235,0.0);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    backdrop-filter: blur(0px);
+    transition: background 0.5s, backdrop-filter 0.5s;
+  }
+
+  #win-overlay.show {
+    display: flex;
+    background: rgba(255,220,235,0.7);
+    backdrop-filter: blur(10px);
+  }
+
+  #win-card {
+    background: white;
+    border-radius: 32px;
+    padding: 50px 60px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(255,100,170,0.3);
+    animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  @keyframes popIn {
+    0%   { transform: scale(0.5) rotate(-5deg); opacity: 0; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+
+  #win-card h1 {
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: #e06fa0;
+    margin-bottom: 12px;
+  }
+
+  #win-card p {
+    font-size: 1.1rem;
+    color: #aaa;
+    margin-bottom: 28px;
+  }
+
+  #win-btn {
+    background: linear-gradient(135deg, #ff8ec2, #ff5ba0);
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 1.2rem;
+    border: none;
+    padding: 16px 40px;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(255,100,170,0.4);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+
+  #win-btn:hover {
+    transform: scale(1.06) translateY(-2px);
+    box-shadow: 0 12px 30px rgba(255,100,170,0.5);
+  }
+
+  /* Floating hearts bg */
+  .heart-bg {
+    position: fixed;
+    font-size: 1.5rem;
+    opacity: 0.12;
+    pointer-events: none;
+    animation: driftHeart linear infinite;
+  }
+
+  @keyframes driftHeart {
+    0%   { transform: translateY(110vh) rotate(0deg); }
+    100% { transform: translateY(-20vh) rotate(30deg); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Floating hearts background -->
+<script>
+  const heartEmojis = ['💕','💖','🌸','💗','✨','🍓','🎀'];
+  for (let i = 0; i < 10; i++) {
+    const h = document.createElement('div');
+    h.className = 'heart-bg';
+    h.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+    h.style.left = (Math.random() * 100) + 'vw';
+    h.style.animationDuration = (8 + Math.random() * 14) + 's';
+    h.style.animationDelay = (-Math.random() * 20) + 's';
+    h.style.fontSize = (1 + Math.random() * 1.5) + 'rem';
+    document.body.appendChild(h);
+  }
+</script>
+
+<!-- HUD -->
+<div id="hud">
+  <div id="title">💕 Pop the Bubbles!</div>
+  <div id="progress-bar-wrap">
+    <div id="progress-bar"></div>
+  </div>
+  <div id="score-box">⭐ <span id="score">0</span> / 100</div>
+</div>
+
+<!-- Game area -->
+<div id="game"></div>
+
+<!-- Win overlay -->
+<div id="win-overlay">
+  <div id="win-card">
+    <div style="font-size:3.5rem; margin-bottom:12px">🎉💕🎊</div>
+    <h1>You did it!</h1>
+    <p>100 points! You're amazing~ 🌸</p>
+    <button id="win-btn" onclick="openSurprise()">Open your surprise 🎁</button>
+  </div>
+</div>
+
+<script>
+  let score = 0;
+  let gameOver = false;
+  const game = document.getElementById('game');
+  const scoreEl = document.getElementById('score');
+  const progressBar = document.getElementById('progress-bar');
+  const scoreBox = document.getElementById('score-box');
+
+  const BUBBLE_COLORS = [
+    { bg: 'rgba(255,150,200,0.65)', border: '#ff8ec2' },
+    { bg: 'rgba(180,200,255,0.65)', border: '#90aaff' },
+    { bg: 'rgba(180,240,200,0.65)', border: '#80e0a0' },
+    { bg: 'rgba(255,220,130,0.65)', border: '#ffd060' },
+    { bg: 'rgba(220,180,255,0.65)', border: '#c090ff' },
+    { bg: 'rgba(255,180,160,0.65)', border: '#ff9080' },
+  ];
+
+  const EMOJIS = ['💖','🌸','🍓','🎀','✨','🌷','🍡','🦋','🌺','💫','🎠','🍰'];
+
+  function spawnBubble() {
+    if (gameOver) return;
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+
+    const size = 55 + Math.random() * 55;
+    const color = BUBBLE_COLORS[Math.floor(Math.random() * BUBBLE_COLORS.length)];
+    const x = Math.random() * (window.innerWidth - size);
+    const duration = 4.5 + Math.random() * 5;
+    const points = size < 75 ? 10 : size < 95 ? 5 : 3;
+    const emoji = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+
+    bubble.style.cssText = `
+      width: ${size}px;
+      height: ${size}px;
+      left: ${x}px;
+      bottom: -${size}px;
+      background: ${color.bg};
+      border: 2.5px solid ${color.border};
+      animation-duration: ${duration}s;
+    `;
+    bubble.textContent = emoji;
+
+    bubble.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (gameOver) return;
+      popBubble(bubble, x + size/2, window.innerHeight - parseFloat(bubble.style.bottom || 0), color.bg, points);
+    });
+
+    game.appendChild(bubble);
+
+    // Remove after animation
+    setTimeout(() => { if (bubble.parentNode) bubble.remove(); }, duration * 1000);
+  }
+
+  function popBubble(bubble, bx, by, color, points) {
+    const rect = bubble.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+
+    bubble.remove();
+
+    // Burst ring
+    const burst = document.createElement('div');
+    burst.className = 'pop-burst';
+    burst.style.cssText = `
+      width: ${rect.width}px;
+      height: ${rect.height}px;
+      left: ${rect.left}px;
+      top: ${rect.top}px;
+      background: ${color};
+      position: fixed;
+    `;
+    document.body.appendChild(burst);
+    setTimeout(() => burst.remove(), 400);
+
+    // Score float
+    const txt = document.createElement('div');
+    txt.className = 'pop-text';
+    txt.textContent = '+' + points;
+    txt.style.cssText = `left: ${cx - 20}px; top: ${cy - 20}px; position: fixed;`;
+    document.body.appendChild(txt);
+    setTimeout(() => txt.remove(), 900);
+
+    // Update score
+    score = Math.min(100, score + points);
+    scoreEl.textContent = score;
+    progressBar.style.width = score + '%';
+
+    // Bump animation
+    scoreBox.classList.add('bump');
+    setTimeout(() => scoreBox.classList.remove('bump'), 150);
+
+    if (score >= 100) {
+      gameOver = true;
+      setTimeout(showWin, 400);
+    }
+  }
+
+  function showWin() {
+    clearInterval(spawnInterval);
+    const overlay = document.getElementById('win-overlay');
+    overlay.style.display = 'flex';
+    setTimeout(() => overlay.classList.add('show'), 10);
+  }
+
+  function openSurprise() {
+    window.location.href = 'belchonok.html';
+  }
+
+  // Spawn bubbles at interval, speed up as score increases
+  let spawnInterval = setInterval(() => {
+    if (!gameOver) {
+      const rate = score < 30 ? 1 : score < 60 ? 2 : 3;
+      for (let i = 0; i < rate; i++) spawnBubble();
+    }
+  }, 900);
+
+  // Initial burst of bubbles
+  for (let i = 0; i < 5; i++) {
+    setTimeout(spawnBubble, i * 200);
+  }
+</script>
+</body>
+</html>

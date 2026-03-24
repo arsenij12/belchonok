@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Для тебя ❤️</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --rose:    #e8253a;
+      --rose-lt: #ff6b81;
+      --blush:   #ffd6dc;
+      --cream:   #fff5f6;
+      --text:    #3a1a20;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(ellipse at 30% 20%, #ffb3bc 0%, #ff6b81 40%, #c0334d 100%);
+      font-family: 'Lato', sans-serif;
+      overflow: hidden;
+    }
+
+    /* ── floating emojis ── */
+    .float {
+      position: fixed;
+      font-size: 22px;
+      pointer-events: none;
+      animation: floatUp linear infinite;
+      z-index: 0;
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(110vh) rotate(0deg);  opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: .8; }
+      100% { transform: translateY(-10vh) rotate(20deg); opacity: 0; }
+    }
+
+    /* ── card ── */
+    .card {
+      position: relative;
+      z-index: 10;
+      background: rgba(255,255,255,.18);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1.5px solid rgba(255,255,255,.45);
+      border-radius: 28px;
+      padding: 48px 44px 40px;
+      max-width: 420px;
+      width: 92vw;
+      text-align: center;
+      box-shadow: 0 8px 48px rgba(100,0,20,.25), inset 0 1px 0 rgba(255,255,255,.5);
+      animation: cardIn .9s cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(40px) scale(.96); }
+      to   { opacity: 1; transform: translateY(0)   scale(1); }
+    }
+
+    /* ── heading ── */
+    h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 2.4rem;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: .5px;
+      line-height: 1.2;
+      text-shadow: 0 2px 12px rgba(180,0,30,.3);
+      animation: fadeSlide .8s .2s both;
+    }
+
+    /* ── SVG heart ── */
+    .heart-wrap {
+      width: 120px;
+      height: 110px;
+      margin: 28px auto 24px;
+    }
+    .heart-wrap svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+    .heart-path {
+      fill: var(--rose);
+      filter: drop-shadow(0 6px 18px rgba(232,37,58,.55));
+      transform-origin: 50px 48px;
+      animation: beat 1.1s ease-in-out infinite;
+    }
+    @keyframes beat {
+      0%,100% { transform: scale(1); }
+      30%      { transform: scale(1.18); }
+      50%      { transform: scale(1.08); }
+      70%      { transform: scale(1.22); }
+    }
+
+    /* ── subtitle ── */
+    .subtitle {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      color: rgba(255,255,255,.9);
+      font-size: 1.1rem;
+      margin-bottom: 28px;
+      animation: fadeSlide .8s .4s both;
+    }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── message box ── */
+    .msg-box {
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,.22);
+      border: 1px solid rgba(255,255,255,.35);
+      border-radius: 14px;
+      padding: 12px 18px;
+      margin-bottom: 24px;
+      font-size: 1rem;
+      color: #fff;
+      font-weight: 300;
+      letter-spacing: .3px;
+      transition: all .35s ease;
+      min-height: 56px;
+    }
+    .msg-box.show {
+      background: rgba(255,255,255,.28);
+    }
+
+    /* ── buttons ── */
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      padding: 11px 22px;
+      border: none;
+      border-radius: 50px;
+      font-family: 'Lato', sans-serif;
+      font-size: .95rem;
+      font-weight: 400;
+      cursor: pointer;
+      transition: all .25s;
+      letter-spacing: .4px;
+    }
+    .btn-primary {
+      background: #fff;
+      color: var(--rose);
+      box-shadow: 0 4px 18px rgba(232,37,58,.3);
+    }
+    .btn-primary:hover {
+      background: var(--rose);
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(232,37,58,.45);
+    }
+    .btn-yes {
+      background: rgba(255,255,255,.85);
+      color: var(--rose);
+    }
+    .btn-yes:hover {
+      background: #fff;
+      transform: translateY(-2px) scale(1.04);
+    }
+
+    /* ── NO button ── */
+    .no-wrap {
+      position: relative;
+      height: 44px;
+    }
+    #noBtn {
+      position: absolute;
+      background: rgba(255,255,255,.35);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.5);
+      transition: background .2s;
+    }
+    #noBtn:hover { background: rgba(255,255,255,.15); }
+
+    /* ── divider ── */
+    .divider {
+      width: 48px;
+      height: 1.5px;
+      background: rgba(255,255,255,.35);
+      margin: 0 auto 20px;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>Эй, ты ❤️</h1>
+
+    <!-- SVG heart -->
+    <div class="heart-wrap">
+      <svg viewBox="0 0 100 90" xmlns="http://www.w3.org/2000/svg">
+        <path class="heart-path"
+          d="M50,80 C50,80 5,50 5,25
+             C5,10 17,2 28,6
+             C36,9 44,17 50,28
+             C56,17 64,9 72,6
+             C83,2 95,10 95,25
+             C95,50 50,80 50,80 Z"/>
+      </svg>
+    </div>
+
+    <p class="subtitle">Я тут подумал...</p>
+
+    <div class="msg-box" id="msg">нажми кнопку 😏</div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="showRandom()">нажми 😏</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="yes()">я милая 😌</button>
+    </div>
+
+    <div class="no-wrap">
+      <button class="btn" id="noBtn" onmouseover="moveBtn()" ontouchstart="moveBtn(this, event)">нет 😒</button>
+    </div>
+  </div>
+
+  <script>
+    const phrases = [
+      "ты делаешь мои дни лучше 💖",
+      "с тобой даже ничего не делать — кайф 😌",
+      "я иногда смотрю на тебя и думаю: вау... это моя девушка 😳",
+      "даже когда ты вредничаешь — ты всё равно лучшая 😏",
+      "мне с тобой спокойно и очень хорошо ❤️",
+      "ты мой любимый человек 💕",
+      "с тобой хочется останавливать время ✨",
+      "ты та, о которой я думаю первым делом 🌅"
+    ];
+
+    function showRandom() {
+      const el = document.getElementById('msg');
+      el.style.opacity = 0;
+      setTimeout(() => {
+        el.innerText = phrases[Math.floor(Math.random() * phrases.length)];
+        el.classList.add('show');
+        el.style.opacity = 1;
+      }, 180);
+    }
+
+    function yes() {
+      const el = document.getElementById('msg');
+      el.style.opacity = 0;
+      setTimeout(() => {
+        el.innerText = "я так и знал 😌❤️";
+        el.classList.add('show');
+        el.style.opacity = 1;
+      }, 180);
+    }
+
+    // "No" button escapes the cursor
+    function moveBtn(el, e) {
+      if (e) e.preventDefault();
+      const btn = document.getElementById('noBtn');
+      const card = btn.closest('.no-wrap');
+      const maxX = card.offsetWidth - btn.offsetWidth;
+      btn.style.left = Math.random() * Math.max(0, maxX) + 'px';
+      btn.style.top  = (Math.random() * 16 - 8) + 'px';
+    }
+
+    // Position "no" button initially
+    window.addEventListener('load', () => {
+      const btn = document.getElementById('noBtn');
+      const card = btn.closest('.no-wrap');
+      btn.style.left = ((card.offsetWidth - btn.offsetWidth) / 2) + 'px';
+      btn.style.top  = '0px';
+    });
+
+    // Smooth opacity transition on msg
+    document.getElementById('msg').style.transition = 'opacity .18s ease';
+
+    // Floating hearts / emojis
+    const emojis = ['❤️','💖','💘','😘','💕','✨'];
+    function spawnFloat() {
+      const el = document.createElement('div');
+      el.className = 'float';
+      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.animationDuration = (4 + Math.random() * 4) + 's';
+      el.style.animationDelay = '0s';
+      el.style.fontSize = (14 + Math.random() * 16) + 'px';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 8000);
+    }
+    setInterval(spawnFloat, 350);
+  </script>
+</body>
+</html>
